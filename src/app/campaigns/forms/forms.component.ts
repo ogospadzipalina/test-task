@@ -65,7 +65,7 @@ export class FormsComponent implements OnInit {
     this.myForm = this.fb.group({
       name: ['', Validators.required],
       productName: ['', Validators.required],
-      keyWords: this.keyWordsControl,
+      keyWords: ['', Validators.required],
       bidAmount: [0, Validators.required],
       fund: [0, Validators.required],
       town: ['', Validators.required],
