@@ -16,4 +16,5 @@ import { TypeaheadModule } from 'ngx-bootstrap/typeahead';
   ],
   exports: [ListComponent, FormsComponent],
 })
+@NgModule()
 export class CampaignsModule {}
