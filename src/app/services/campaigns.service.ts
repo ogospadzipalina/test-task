@@ -1,15 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import {
-  Component,
-  OnInit,
-  Input,
-  Output,
-  EventEmitter,
-  ChangeDetectionStrategy,
-} from '@angular/core';
 import { Campaign } from '../campaigns/types/campaign';
-import { map, tap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { DataService } from './data.service';
 
 @Injectable({
@@ -28,8 +20,6 @@ export class CampaignsService {
     this.changeSubject.asObservable();
 
   public parentBalance$: Observable<number> = of(0);
-  private parentBalanceSubject: BehaviorSubject<number> =
-    new BehaviorSubject<number>(0);
 
   constructor(private dataService: DataService) {
     this.loadInitialData();

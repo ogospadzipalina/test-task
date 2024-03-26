@@ -38,7 +38,7 @@
         (focus)="hideList()"
         id="productName"
       >
-        <option disabled selected value="">Select a product</option>
+        <option disabled value="">Select a product</option>
         <option *ngFor="let product of products" [value]="product">
           {{ product }}
         </option>
@@ -124,7 +124,7 @@
     <div class="forms__item">
       <label class="forms__label" for="town">Town</label>
       <select class="forms__option" required formControlName="town" id="town">
-        <option disabled selected value="">Select a town</option>
+        <option disabled value="">Select a town</option>
         <option
           class="forms__option"
           *ngFor="let town of towns"

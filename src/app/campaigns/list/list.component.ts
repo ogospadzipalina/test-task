@@ -4,7 +4,6 @@ import {
   Input,
   Output,
   EventEmitter,
-  ChangeDetectionStrategy,
 } from '@angular/core';
 import { Campaign } from '../types/campaign';
 import { CampaignsService } from '../../services/campaigns.service';
@@ -20,8 +19,6 @@ export class ListComponent implements OnInit {
     new EventEmitter<{ id: number; status: string }>();
   campaigns: Campaign[] = [];
   parentBalance: number = 10000;
-  ogBalance: number = this.parentBalance;
-  changedCampaign: { id: number; status: string } = { id: 0, status: '' };
   constructor(private campaignsService: CampaignsService) {}
 
   ngOnInit(): void {

@@ -5,7 +5,6 @@ import {
   FormGroup,
   Validators,
 } from '@angular/forms';
-import { NgForm } from '@angular/forms';
 import { Campaign } from '../types/campaign';
 import { DataService } from '../../services/data.service';
 import { CampaignsService } from '../../services/campaigns.service';
@@ -20,8 +19,8 @@ import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class FormsComponent implements OnInit {
+  keyWordsControl: FormControl;
   myForm: FormGroup = new FormGroup({});
-  keyWordsControl: FormControl = new FormControl({});
   budgetInicial: number = 10000;
   budget: number = this.budgetInicial;
   changedCampaign: { id: number; status: string } = { id: 0, status: '' };
@@ -76,17 +75,6 @@ export class FormsComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.myForm = this.fb.group({
-      name: ['', Validators.required],
-      productName: ['', Validators.required],
-      keyWords: ['', Validators.required],
-      bidAmount: [0, Validators.required],
-      fund: [0, Validators.required],
-      town: ['', Validators.required],
-      radius: [0, Validators.required],
-      status: [''],
-    });
-
     this.keyWords$ = this.keyWordsControl.valueChanges.pipe(
       startWith(''),
       debounceTime(300),
