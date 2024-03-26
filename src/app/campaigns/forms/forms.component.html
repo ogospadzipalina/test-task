@@ -63,9 +63,7 @@
         type="text"
         id="keyWords"
         placeholder="Please enter keywords"
-        [typeahead]="keyWords$"
         typeaheadOptionField="."
-        (typeaheadOnSelect)="onSelectKeyword($event.item)"
       />
       <p
         class="forms__info"
