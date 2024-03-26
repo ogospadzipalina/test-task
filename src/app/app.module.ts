@@ -5,15 +5,9 @@ import { AppComponent } from './app.component';
 import { CampaignsModule } from './campaigns/campaigns.module';
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    FormsModule,
-    CampaignsModule
-  ],
+  declarations: [AppComponent],
+  imports: [BrowserModule, FormsModule, CampaignsModule],
   providers: [],
-  bootstrap: [AppComponent]
+  bootstrap: [AppComponent],
 })
-export class AppModule { }
+export class AppModule {}

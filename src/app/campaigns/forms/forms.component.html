@@ -1,175 +1,210 @@
-<h1 class="header" *ngIf="areWeEditing">Edit mode</h1>
-<h1 class="header" *ngIf="!areWeEditing">Create Mode</h1>
+<h1 class="header" *ngIf="isEditing">Edit mode</h1>
+<h1 class="header" *ngIf="!isEditing">Create Mode</h1>
 
 <div class="form">
-  <form #employeForm="ngForm" class="forms" (ngSubmit)="testForm(employeForm)" novalidate>
-
-  <div class="forms__item">
-    <label class="forms__label" for="name">Name</label>
-    <input
-      class="forms__input"
-      (focus)="hideList()"
-      required #CamName="ngModel"
-      name="name" [(ngModel)]="name"
-      type="text"
-      id="name"
-      placeholder="Please enter campaign name"
-    >
-    <p class="forms__info" *ngIf="CamName.invalid && (CamName.dirty || CamName.touched)">
-      Campaign name is required
-    </p>
-  </div>
-
-  <div class="forms__item">
-    <label  class="forms__label" for="productName">Product name</label>
-    <select
-      class="forms__option"
-      (focus)="hideList()"
-      required #ProdName="ngModel"
-      name="productName"
-      [(ngModel)]="productName"
-      id="productName"
-    >
-    <option disabled selected value="">Select a product</option>
-      <option *ngFor="let product of products" value="{{product}}">{{product}}</option>
-    </select>
-    <p class="forms__info" *ngIf="ProdName.invalid && (ProdName.dirty || ProdName.touched)">
-      Product name is required
-    </p>
-  </div>
-  <div
-    class="forms__item"
-    (focus)="showList()"
-    (blur)="hideList()"
+  <form
+    [formGroup]="myForm"
+    class="forms"
+    (ngSubmit)="testForm()"
+    novalidate
+    autocomplete
   >
+    <div class="forms__item">
+      <label class="forms__label" for="name">Name</label>
+      <input
+        class="forms__input"
+        formControlName="name"
+        (focus)="hideList()"
+        type="text"
+        id="name"
+        placeholder="Please enter campaign name"
+      />
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('name')?.invalid &&
+          (myForm.get('name')?.dirty || myForm.get('name')?.touched)
+        "
+      >
+        Campaign name is required
+      </p>
+    </div>
 
-  <label class="forms__label" for="keyWords">Key words</label>
-  <input
-    class="forms__input"
-    name="keyWords"
-    required
-    (focus)="showList()"
-    #KeyWordsInput="ngModel"
-    [(ngModel)]="keyWord"
-    type="text"
-    id="keyWords"
-    (input)="doKeyWordSearch()"
-    placeholder="Please enter keywords"
-  >
-  <ul class="forms__keys" *ngIf="KeyWordsInput.dirty && listIsVisible">
-    <li *ngFor="let key of keys$ | async" (click)="selectKey(key)">{{ key }}</li>
-  </ul>
-  <p class="forms__info" *ngIf="KeyWordsInput.invalid && (KeyWordsInput.dirty || KeyWordsInput.touched)">
-    Keywords are required
-  </p>
-  </div>
-
-  <div class="forms__item">
-    <label class="forms__label" for="bidAmount">Bid Amount</label>
-    <input
-      class="forms__input"
-      (focus)="hideList()"
-      required min="1"
-      #BidAmount="ngModel"
-      name="bidAmount"
-      [(ngModel)]="bidAmount"
-      type="number"
-      id="bidAmount"
-    >
-    <p class="forms__info" *ngIf="BidAmount.invalid && (BidAmount.dirty || BidAmount.touched)">
-      Bid amount needs to be min 1
-    </p>
-  </div>
-
-  <div class="forms__item">
-    <label class="forms__label" for="fund">Fund</label>
-    <input
-      class="forms__input"
-      (focus)="hideList()"
-      required min="1" max="{{budget}}"
-      #Fund="ngModel"
-      name="fund"
-      [(ngModel)]="fund"
-      type="number"
-      id="fund"
-    >
-    <p  class="forms__info" *ngIf="Fund.invalid && (Fund.dirty || Fund.touched)">
-      Fund needs to be min 1 and lower than budget
-    </p>
-  </div>
-
-  <div class="forms__item">
-    <label class="forms__label" for="town">Town</label>
-    <select
-      class="forms__option"
-      required
-      #Town="ngModel"
-      name="town"
-      [(ngModel)]="town"
-      id="town"
-    >
-    <option disabled selected value="">Select a town</option>
-      <option
+    <div class="forms__item">
+      <label class="forms__label" for="productName">Product name</label>
+      <select
         class="forms__option"
-        *ngFor="let town of towns"
-        value="{{town}}"
-      >{{town}}</option>
-    </select>
-    <p class="forms__info" *ngIf="Town.invalid && (Town.dirty || Town.touched)">
-      Town needs to be selected
-    </p>
-  </div>
+        formControlName="productName"
+        (focus)="hideList()"
+        id="productName"
+      >
+        <option disabled selected value="">Select a product</option>
+        <option *ngFor="let product of products" [value]="product">
+          {{ product }}
+        </option>
+      </select>
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('productName')?.invalid &&
+          (myForm.get('productName')?.dirty ||
+            myForm.get('productName')?.touched)
+        "
+      >
+        Product name is required
+      </p>
+    </div>
 
-  <div class="forms__item">
-    <label class="forms__label" for="radius">Radius</label>
-    <input
-      class="forms__input"
-      min="1" max="50" required
-      #Radius="ngModel"
-      name="radius"
-      [(ngModel)]="radius"
-      type="number"
-      id="radius"
-    >
-    <p class="forms__info" *ngIf="Radius.invalid && (Radius.dirty || Radius.touched)">
-      Radius needs to be min 1 km and lower than 50 km
-    </p>
-  </div>
+    <div class="forms__item">
+      <label class="forms__label" for="keyWords">Key words</label>
+      <input
+        class="forms__input"
+        formControlName="keyWords"
+        type="text"
+        id="keyWords"
+        placeholder="Please enter keywords"
+        [typeahead]="keyWords$"
+        typeaheadOptionField="."
+        (typeaheadOnSelect)="onSelectKeyword($event.item)"
+      />
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('keyWords')?.invalid &&
+          (myForm.get('keyWords')?.dirty || myForm.get('keyWords')?.touched)
+        "
+      >
+        Keywords are required
+      </p>
+    </div>
 
-  <div class="forms__status">
-    <label class="forms__label" for="active">Active</label>
-    <input
-      class="forms__status-input"
-      name="status"
-      #Status="ngModel"
-      [(ngModel)]="status"
-      type="radio"
-      id="active"
-      value="active"
-       required
-    >
-    <label class="forms__status--label" for="inactive">Inactive</label>
-    <input
-      class="forms__status--input"
-      name="status"
-      #Status="ngModel"
-      [(ngModel)]="status"
-      type="radio"
-      id="inactive"
-      value="inactive"
-      required
-    >
-    <p class="forms__status--info" *ngIf="(Status.invalid && (employeForm.dirty || employeForm.touched))">
-      Please select a status
-    </p>
-  </div>
-  <button class="button" type="submit" [disabled]="employeForm.invalid">submit</button>
+    <div class="forms__item">
+      <label class="forms__label" for="bidAmount">Bid Amount</label>
+      <input
+        class="forms__input"
+        (focus)="hideList()"
+        type="number"
+        id="bidAmount"
+        formControlName="bidAmount"
+      />
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('bidAmount')?.errors &&
+          (myForm.get('bidAmount')?.dirty || myForm.get('bidAmount')?.touched)
+        "
+      >
+        Bid amount needs to be min 1
+      </p>
+    </div>
+
+    <div class="forms__item">
+      <label class="forms__label" for="fund">Fund</label>
+      <input
+        class="forms__input"
+        (focus)="hideList()"
+        required
+        min="1"
+        max="{{ budget }}"
+        formControlName="fund"
+        type="number"
+        id="fund"
+      />
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('fund')?.errors &&
+          (myForm.get('fund')?.dirty || myForm.get('fund')?.touched)
+        "
+      >
+        Fund needs to be min 1 and lower than budget
+      </p>
+    </div>
+
+    <div class="forms__item">
+      <label class="forms__label" for="town">Town</label>
+      <select class="forms__option" required formControlName="town" id="town">
+        <option disabled selected value="">Select a town</option>
+        <option
+          class="forms__option"
+          *ngFor="let town of towns"
+          value="{{ town }}"
+        >
+          {{ town }}
+        </option>
+      </select>
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('town')?.invalid &&
+          (myForm.get('town')?.dirty || myForm.get('town')?.touched)
+        "
+      >
+        Town needs to be selected
+      </p>
+    </div>
+
+    <div class="forms__item">
+      <label class="forms__label" for="radius">Radius</label>
+      <input
+        class="forms__input"
+        min="1"
+        max="50"
+        required
+        formControlName="radius"
+        type="number"
+        id="radius"
+      />
+      <p
+        class="forms__info"
+        *ngIf="
+          myForm.get('radius')?.invalid &&
+          (myForm.get('radius')?.dirty || myForm.get('radius')?.touched)
+        "
+      >
+        Radius needs to be min 1 km and lower than 50 km
+      </p>
+    </div>
+
+    <div class="forms__status">
+      <label class="forms__label" for="active">Active</label>
+      <input
+        class="forms__status-input"
+        formControlName="status"
+        type="radio"
+        id="active"
+        value="active"
+      />
+      <label class="forms__status--label" for="inactive">Inactive</label>
+      <input
+        class="forms__status--input"
+        formControlName="status"
+        type="radio"
+        id="inactive"
+        value="inactive"
+      />
+      <p
+        class="forms__status--info"
+        *ngIf="
+          myForm.get('status')?.invalid && (myForm.dirty || myForm.touched)
+        "
+      >
+        Please select a status
+      </p>
+    </div>
+    <button class="button" type="submit" [disabled]="myForm.invalid">
+      Submit
+    </button>
   </form>
-
 </div>
 
-  <div class="forms__budget">
-    <h1 class="forms__budget-txt">Avalible balance: {{budget | currency:'PLN'}}</h1>
-  </div>
+<div class="forms__budget">
+  <h1 class="forms__budget-txt">
+    Avalible balance: {{ budget | currency: "PLN" }}
+  </h1>
+</div>
 
-<app-list [avalibleCampaigns]="campaigns" (changedC)="onCampaignChange($event)"></app-list>
+<app-list
+  [avalibleCampaigns]="campaigns"
+  (changedC)="onCampaignChange($event)"
+></app-list>

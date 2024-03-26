@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Campaign } from './campaigns/types/campaign';
+import { Campaign } from '../campaigns/types/campaign';
 
 @Injectable({
   providedIn: 'root',
@@ -26,7 +26,7 @@ export class DataService {
     'Google Pixel 7',
     'OnePlus 9',
     'Xiaomi Mi 11',
-    'Huawei P40 Pro'
+    'Huawei P40 Pro',
   ];
 
   private towns: string[] = [
@@ -35,7 +35,7 @@ export class DataService {
     'Gdańsk',
     'Poznań',
     'Wrocław',
-    'Łódź'
+    'Łódź',
   ];
   private keyWords: string[] = [
     'shop',
@@ -135,7 +135,7 @@ export class DataService {
     'fit guide',
     'style quiz',
   ];
-  private id:number = 3;
+  private id: number = 2;
 
   getTowns(): string[] {
     return this.towns;
@@ -162,7 +162,7 @@ export class DataService {
   }
 
   removeCampaign(c: Campaign): void {
-    this.campaigns = this.campaigns.filter( (campaign) => campaign.id !== c.id);
+    this.campaigns = this.campaigns.filter((campaign) => campaign.id !== c.id);
   }
 
   addCampaign(newCampaign: Campaign): void {

@@ -16,18 +16,28 @@
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let campaign of campaigns" [ngClass]="{'row-error': campaign.status === 'inactive'}" class="list__row">
-       <td class="list__cell">{{ campaign.id }}</td>
-       <td class="list__cell">{{ campaign.name }}</td>
-       <td class="list__cell">{{ campaign.productName }}</td>
-       <td class="list__cell">{{ campaign.keyWords.join(', ') }}</td>
-       <td class="list__cell">{{ campaign.bidAmount | currency:'PLN' }}</td>
-       <td class="list__cell">{{ campaign.fund | currency:'PLN'  }}</td>
-       <td class="list__cell">{{ campaign.status === 'active' ? 'Active' : 'Inactive' }}</td>
-       <td class="list__cell">{{ campaign.town }}</td>
-       <td class="list__cell">{{ campaign.radius | kilometers }}</td>
-       <td class="list__cell" ><button (click)="removeCampaign(campaign)">remove</button></td>
-       <td class="list__cell" ><button (click)="editCampaign(campaign)">edit</button></td>
+      <tr
+        *ngFor="let campaign of campaigns"
+        [ngClass]="{ 'row-error': campaign.status === 'inactive' }"
+        class="list__row"
+      >
+        <td class="list__cell">{{ campaign.id }}</td>
+        <td class="list__cell">{{ campaign.name }}</td>
+        <td class="list__cell">{{ campaign.productName }}</td>
+        <td class="list__cell">{{ campaign.keyWords.join(", ") }}</td>
+        <td class="list__cell">{{ campaign.bidAmount | currency: "PLN" }}</td>
+        <td class="list__cell">{{ campaign.fund | currency: "PLN" }}</td>
+        <td class="list__cell">
+          {{ campaign.status === "active" ? "Active" : "Inactive" }}
+        </td>
+        <td class="list__cell">{{ campaign.town }}</td>
+        <td class="list__cell">{{ campaign.radius | kilometers }}</td>
+        <td class="list__cell">
+          <button (click)="removeCampaign(campaign)">remove</button>
+        </td>
+        <td class="list__cell">
+          <button (click)="editCampaign(campaign)">edit</button>
+        </td>
       </tr>
     </tbody>
   </table>

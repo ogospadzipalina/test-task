@@ -1,32 +1,44 @@
-import { Component, OnInit } from '@angular/core';
-import { NgForm,} from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import {
+  FormBuilder,
+  FormControl,
+  FormGroup,
+  Validators,
+} from '@angular/forms';
+import { NgForm } from '@angular/forms';
 import { Campaign } from '../types/campaign';
-import { DataService } from '../../data.service';
+import { DataService } from '../../services/data.service';
+import { CampaignsService } from '../../services/campaigns.service';
 import { Observable, of } from 'rxjs';
+import { debounceTime, switchMap, startWith } from 'rxjs/operators';
+import { TypeaheadMatch } from 'ngx-bootstrap/typeahead';
 
 @Component({
   selector: 'app-forms',
   templateUrl: './forms.component.html',
   styleUrls: ['./forms.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-
 export class FormsComponent implements OnInit {
+  myForm: FormGroup = new FormGroup({});
+  keyWordsControl: FormControl = new FormControl({});
   budgetInicial: number = 10000;
   budget: number = this.budgetInicial;
-  changedCampaign:  {id: number, status: string} = {id: 0, status: ''};
-  areWeEditing: boolean = false;
+  changedCampaign: { id: number; status: string } = { id: 0, status: '' };
+  isEditing: boolean = false;
   campaigns: Campaign[] = [];
   products: string[] = this.dataService.getProducts();
   towns: string[] = this.dataService.getTowns();
   keyWord: string = '';
-  keys$: Observable<string[]>;
+  keys$: Observable<string[]> = of([]);
   keyWordsArr: string[] = [];
+  keyWords$: Observable<string[]> = of([]);
 
   editedCampaign: Campaign = {
     id: 4,
     name: '',
     productName: '',
-    keyWords: ['',''],
+    keyWords: ['', ''],
     bidAmount: 0,
     fund: 0,
     status: 'active',
@@ -45,13 +57,49 @@ export class FormsComponent implements OnInit {
   newId: number = 0;
   listIsVisible: boolean = false;
 
-  constructor(private dataService: DataService) {this.keys$ = of([]);}
+  constructor(
+    private fb: FormBuilder,
+    public dataService: DataService,
+    private campaignsService: CampaignsService,
+  ) {
+    this.keyWordsControl = new FormControl('', Validators.required);
+    this.myForm = this.fb.group({
+      name: ['', Validators.required],
+      productName: ['', Validators.required],
+      keyWords: this.keyWordsControl,
+      bidAmount: [0, Validators.required],
+      fund: [0, Validators.required],
+      town: ['', Validators.required],
+      radius: [0, Validators.required],
+      status: [''],
+    });
+  }
 
   ngOnInit(): void {
-    this.campaigns = this.dataService.getCampaigns();
-    console.log(this.campaigns);
-    this.newId = this.campaigns.length + 1;
-    this.budget = this.getBalance();
+    this.myForm = this.fb.group({
+      name: ['', Validators.required],
+      productName: ['', Validators.required],
+      keyWords: ['', Validators.required],
+      bidAmount: [0, Validators.required],
+      fund: [0, Validators.required],
+      town: ['', Validators.required],
+      radius: [0, Validators.required],
+      status: [''],
+    });
+
+    this.keyWords$ = this.keyWordsControl.valueChanges.pipe(
+      startWith(''),
+      debounceTime(300),
+      switchMap((keyword) => {
+        if (keyword && keyword.length >= 2) {
+          return of(
+            this.dataService.getKeyWords().filter((w) => w.includes(keyword)),
+          );
+        } else {
+          return of([]);
+        }
+      }),
+    );
   }
 
   showList() {
@@ -62,28 +110,25 @@ export class FormsComponent implements OnInit {
     this.listIsVisible = false;
   }
 
-  doKeyWordSearch() {
-    this.keys$ = of([]);
-    if (this.keyWord.length > 0) {
-      this.keys$ = this.fetchKeywords(this.keyWord);
-    }
+  fetchKeywords() {
+    const keywords = this.dataService.getKeyWords();
+    this.keyWords$ = of(keywords);
   }
 
-  fetchKeywords(keyword: string): Observable<string[]> {
-    const mockKeyword: string[] = this.dataService.getKeyWords();
-    const q: string = this.removeCharsBeforeLastComma(keyword);
-    return of(mockKeyword.filter((w)=> w.includes(q)));
+  onSelect(event: TypeaheadMatch) {
+    this.keyWord = event.item;
   }
 
-  selectKey(selectedKey: string) {
-    if(this.keyWord.includes(',')) {
-      this.keyWord += (this.removeCharsBeforeLastComma(selectedKey) + ',')
+  onSelectKeyword(event: TypeaheadMatch<string>) {
+    const selectedKey: string = event.item;
+    if (this.keyWord.includes(',')) {
+      this.keyWord += this.removeCharsBeforeLastComma(selectedKey) + ',';
     } else {
-    this.keyWord = (selectedKey + ',');
+      this.keyWord = selectedKey + ',';
     }
   }
 
-   removeCharsBeforeLastComma(inputString: string): string {
+  removeCharsBeforeLastComma(inputString: string): string {
     const lastCommaIndex = inputString.lastIndexOf(',');
 
     if (lastCommaIndex !== -1) {
@@ -93,52 +138,44 @@ export class FormsComponent implements OnInit {
     }
   }
 
-   splitString(inputString: string) {
+  splitString(inputString: string) {
     const stringArray = inputString.split(',');
     const trimmedArray = stringArray.map((str: string) => str.trim());
 
     return trimmedArray;
   }
 
- reverseArrayToString(inputArray: string[]) : string {
-  const reversedString = inputArray.join(', ');
+  reverseArrayToString(inputArray: string[]): string {
+    const reversedString = inputArray.join(', ');
 
-  return reversedString;
+    return reversedString;
   }
 
-  testForm(empForm: NgForm): void {
-    console.log(empForm.value);
+  testForm(): void {
     this.keyWordsArr = this.splitString(this.keyWord);
 
-    this.editedCampaign.name = this.name;
-    this.editedCampaign.productName = this.productName;
+    this.editedCampaign.name = this.myForm.value.name;
+    this.editedCampaign.productName = this.myForm.value.productName;
     this.editedCampaign.keyWords = this.keyWordsArr;
-    this.editedCampaign.bidAmount = this.bidAmount;
-    this.editedCampaign.fund = this.fund;
-    this.editedCampaign.town = this.town;
-    this.editedCampaign.radius = this.radius;
-    this.editedCampaign.status = this.status;
+    this.editedCampaign.bidAmount = this.myForm.value.bidAmount;
+    this.editedCampaign.fund = this.myForm.value.fund;
+    this.editedCampaign.town = this.myForm.value.town;
+    this.editedCampaign.radius = this.myForm.value.radius;
+    this.editedCampaign.status = this.myForm.value.status;
 
-    if(this.areWeEditing) {
-    this.campaigns[this.changedCampaign.id - 1] = this.editedCampaign;
-    this.areWeEditing = false;
-
+    if (this.isEditing) {
+      this.campaigns[this.changedCampaign.id - 1] = this.editedCampaign;
+      this.campaignsService.editCampaign(this.editedCampaign); // Call editCampaign method
+      this.isEditing = false;
     } else {
-      this.newId += 1;
       this.campaigns.push(this.editedCampaign);
+      this.campaignsService.addCampaign(this.editedCampaign); // Call addCampaign method
     }
-    console.log(this.keyWord);
-    empForm.resetForm();
 
-    this.name = '';
-    this.productName = '';
+    this.myForm.reset();
     this.keyWord = '';
-    this.bidAmount = 0;
-    this.fund = 0;
-    this.town = '';
-    this.radius = 0;
     this.editedCampaign = {
-      id: this.newId,
+      id: this.campaigns.length + 1,
       name: '',
       productName: '',
       keyWords: [],
@@ -146,47 +183,46 @@ export class FormsComponent implements OnInit {
       fund: 0,
       town: '',
       status: '',
-      radius:  0,
+      radius: 0,
     };
     this.budget = this.getBalance();
   }
 
-  getCost(): number  {
-    if(this.campaigns) {
-    return this.campaigns
-    .filter((c) => c.status !== 'removed')
-    .map(campaign => campaign.fund)
-    .reduce((previous, current) => previous + current, 0);
-  }
+  getCost(): number {
+    if (this.campaigns) {
+      return this.campaigns
+        .filter((c) => c.status !== 'removed')
+        .map((campaign) => campaign.fund)
+        .reduce((previous, current) => previous + current, 0);
+    }
     return 0;
   }
   getBalance(): number {
     return this.budgetInicial - this.getCost();
   }
 
-  onCampaignChange(c: {id: number, status: string}) {
+  onCampaignChange(c: { id: number; status: string }) {
     this.changedCampaign = c;
     console.log(this.changedCampaign);
     const cam = this.campaigns.find((c) => c.id === this.changedCampaign.id);
-    if(this.changedCampaign.status === 'removed' && cam) {
+    if (this.changedCampaign.status === 'removed' && cam) {
       this.getBalance();
       this.budget += cam?.fund;
       this.campaigns.filter((c) => c.id !== this.changedCampaign.id);
     } else {
       if (cam) {
-      this.editedCampaign = cam;
+        this.editedCampaign = cam;
 
-      this.name = this.editedCampaign.name;
-      this.productName = this.editedCampaign.productName;
-      this.keyWord = this.reverseArrayToString(this.editedCampaign.keyWords);
-      this.bidAmount = this.editedCampaign.bidAmount;
-      this.fund = this.editedCampaign.fund;
-      this.town = this.editedCampaign.town;
-      this.radius = this.editedCampaign.radius;
-      this.status = this.editedCampaign.status;
-      console.log(this.keyWords);
+        this.name = this.editedCampaign.name;
+        this.productName = this.editedCampaign.productName;
+        this.keyWord = this.reverseArrayToString(this.editedCampaign.keyWords);
+        this.bidAmount = this.editedCampaign.bidAmount;
+        this.fund = this.editedCampaign.fund;
+        this.town = this.editedCampaign.town;
+        this.radius = this.editedCampaign.radius;
+        this.status = this.editedCampaign.status;
       }
-      this.areWeEditing = true;
+      this.isEditing = true;
       this.getBalance();
       this.budget += this.editedCampaign.fund;
     }
